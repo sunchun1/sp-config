@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: zuul
+  cloud:
+    config:
+      override-none: true
+
+
+server:
+  port: 3001
+  
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka1:2001/eureka,http://eureka2:2002/eureka
+      
+zuul:
+  routes:
+    item-service: /item-service/**
+    order-service: /order-service/**
+    user-service: /user-service/**
+  retryable: true  #开启重试ribbon的重试(默认重试1次),需要spring retry依赖
+
+ribbon:
+  MaxAutoRetries: 1
+  
+item-service:
+  ribbon:
+     MaxAutoRetriesNextServer: 2
+     
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 500
+            
+#暴露监控端点         
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
